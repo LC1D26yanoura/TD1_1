@@ -100,7 +100,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//数字
-	
+	int drinkanime = 120;
+
 	int DubleJumpready = 0;
 
 	//背景の宣言
@@ -125,13 +126,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	int enemyposx4 = 1780;
 	
 	int enemyposy1 = 600;
-	int enemyposy2 = 630;
+	int enemyposy2 = 600;
 	int enemyposy3 = 500;
-	int enemyposy4 = 400;
+	int enemyposy4 = 300;
 	
 	int enemysize = 20;
 	
 	int enemyspeed = 10;
+
+	int time1 = 300;
+	int time2 = 300;
+	int time3 = 300;
+	int time4 = 300;
 
 	//自機のサイズ
 	int playersize = 20;
@@ -149,6 +155,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//自機生存フラグ
 	int isplayersurvive = 1;
 
+	//アイテムの宣言
+	int Item[] = { Novice::LoadTexture("./drink1.png"),
+	 Novice::LoadTexture("./drink2.png"),
+	 Novice::LoadTexture("./drink3.png"),
+	 Novice::LoadTexture("./drink4.png"),
+	 Novice::LoadTexture("./drink5.png"),
+	 Novice::LoadTexture("./drink6.png"), };
+	int itemposx = 1280;
+	int itemposy = 600;
+	int itemtime = 1800;
+	int isDrinkGet = 0;
+	int DrinkTimer = 1200;
 	//ゲームシーン
 	enum Scene {
 		TITLE,
@@ -189,7 +207,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		case PLAY:
 
-			Novice::PlayAudio(bgm, 1, 1);
+		
 		
 		//背景
 		Novice::DrawSprite(bgx, 0, bg1, 1, 1, 0.0f, WHITE);
@@ -243,35 +261,105 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			isplayersurvive = 0;
 		}
 		//敵が画面外に行ったら座標を戻す
-		if (enemyposx1 <= 0) {
-			enemyposx1 = 1280;
-		}
-		if (enemyposx2 <= 0) {
-			enemyposx2 = 1280;
-		}
-		if (enemyposx3 <= 0) {
-			enemyposx3 = 1280;
-		}
-		if (enemyposx4 <= 0) {
-			enemyposx4 = 1280;
-		}
+		
 
 		
 		if (isplayersurvive == 1) {
+			//敵表示のタイム
+			time1 -= 1;
+			time2 -= 1;
+			time3 -= 1;
+			time4 -= 1;
+			itemtime -= 1;
+
+			//BGM
+			Novice::PlayAudio(bgm, 1, 1);
 			//自機
 			if (isPlJump == 0 && isDubleJump == 0) {
 				Novice::DrawSprite((int)pl.pos.x, (int)PltransposY, player[0], 1, 1, 0, WHITE);
 			}
 			//敵の描画
-			Novice::DrawSprite(enemyposx1, enemyposy1, bike1, 1, 1, 0.0f, WHITE);
-			Novice::DrawSprite(enemyposx2, enemyposy2, bike1, 1, 1, 0.0f, WHITE);
-			Novice::DrawSprite(enemyposx3, enemyposy3, bird1, 1, 1, 0.0f, WHITE);
-			Novice::DrawSprite(enemyposx4, enemyposy4, bird1, 1, 1, 0.0f, WHITE);
-			//敵を動かす
-			enemyposx1 -= enemyspeed;
-			enemyposx2 -= enemyspeed;
-			enemyposx3 -= enemyspeed;
-			enemyposx4 -= enemyspeed;
+			if (time1 <= 30) {
+				Novice::DrawSprite(enemyposx1, enemyposy1, bike1, 1.5, 1.5, 0.0f, WHITE);
+				enemyposy1 = enemyposy1 + enemyspeed;
+			}
+			if (time1 == 0) {
+				time1 = 180;
+			}
+			if (enemyposx1 <= 0) {
+				enemyposx1 = 1280;
+			}
+			if (time2 <= 150) {
+				Novice::DrawSprite(enemyposx2, enemyposy2, bike1, 1.5, 1.5, 0.0f, WHITE);
+				enemyposy2 = enemyposy2 + enemyspeed;
+			}
+			if (time2 == 0) {
+				time2 = 180;
+			}
+			if (enemyposx2 <= 0) {
+				enemyposx2 = 1658;
+			}
+			if (time3 <= 120) {
+				Novice::DrawSprite(enemyposx3, enemyposy3, bird1, 1.5, 1.5, 0.0f, WHITE);
+				enemyposy3 = enemyposy3 + enemyspeed;
+			}
+			if (time3 == 0) {
+				time3 = 180;
+			}
+			if (enemyposx3 >= 0) {
+				enemyposx3 = 2347;
+			}
+			if (time4 <= 180) {
+				Novice::DrawSprite(enemyposx4, enemyposy4, bird1, 1.5, 1.5, 0.0f, WHITE);
+				enemyposy4 = enemyposy4 + enemyspeed;
+			}
+			if (time4 == 0) {
+				time4 = 180;
+			}
+			if (enemyposx4 <= 0) {
+				enemyposx4 = 1973;
+			}
+			//アイテムとったら二段ジャンプ
+			if(itemtime == 0){
+			    if (drinkanime <= 120 && drinkanime > 100) {
+			    	Novice::DrawSprite(itemposx, itemposy, Item[0], 1, 1, 0, WHITE);
+			    }
+			    if (drinkanime <= 100 && drinkanime > 80) {
+			    	Novice::DrawSprite(itemposx, itemposy, Item[1], 1, 1, 0, WHITE);
+			    }
+				if (drinkanime <= 80 && drinkanime > 60) {
+					Novice::DrawSprite(itemposx, itemposy, Item[2], 1, 1, 0, WHITE);
+				}
+				if (drinkanime <= 60 && drinkanime > 40) {
+					Novice::DrawSprite(itemposx, itemposy, Item[3], 1, 1, 0, WHITE);
+				}
+				if (drinkanime <= 40 && drinkanime > 20) {
+					Novice::DrawSprite(itemposx, itemposy, Item[4], 1, 1, 0, WHITE);
+				}
+				if (drinkanime <= 20 && drinkanime >= 0) {
+					Novice::DrawSprite(itemposx, itemposy, Item[5], 1, 1, 0, WHITE);
+				}
+				if (drinkanime == 0) {
+					drinkanime = 120;
+
+				}
+			}
+			if (isPlJump == 1 && isDubleJump == 0 && DubleJumpready >= 1 && preKeys[DIK_SPACE] == 0 && keys[DIK_SPACE] && isDrinkGet == 1) {
+				pl.velocity.y = 20.0f;  //↑既存のジャンプ処理の所に飲み物を取っているかのフラグを書き足す
+				isDubleJump = 1;
+			}
+			if (isDrinkGet == 1) {
+				DrinkTimer--;
+			}//飲み物を取ったら時間制限開始
+
+			if (DrinkTimer == 0) {
+				isDrinkGet = 0;
+				DrinkTimer = 1200;
+			}//制限時間が終わると値を全て戻し、二段ジャンプをできないようにする
+			if (isDrinkGet == 1 && DrinkTimer > 200 || DrinkTimer < 150 && DrinkTimer>100 || DrinkTimer < 80 && DrinkTimer>60 || DrinkTimer < 40 && DrinkTimer>30 || DrinkTimer < 20 && DrinkTimer>10 || DrinkTimer < 5 && DrinkTimer>3) {
+				Novice::DrawSprite((int)pl.pos.x - 10, (int)PltransposY, player[1], 1, 1, 0, WHITE);
+			}//アイコンを表示し、時間が迫るとちかちかさせる
+
 			//プレイヤーのジャンプ
 
 			if (isPlJump == 0 && preKeys[DIK_SPACE] == 0 && keys[DIK_SPACE]) {
@@ -399,9 +487,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 		
 
-		Novice::ScreenPrintf(100, 100, "%f", pl.velocity.y);
+		Novice::ScreenPrintf(100, 100, "%f", PltransposY);
 		Novice::ScreenPrintf(100, 200, "%d", isDubleJump);
-		
+		Novice::ScreenPrintf(100, 300, "%d", time1);
+		Novice::ScreenPrintf(100, 350, "%d", time2);
+		Novice::ScreenPrintf(100, 400, "%d", time3);
+		Novice::ScreenPrintf(100, 450, "%d", time4);
+		Novice::ScreenPrintf(100, 500, "%d", itemtime);
 		///
 		/// ↑描画処理ここまで
 		///
