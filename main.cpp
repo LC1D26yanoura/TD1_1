@@ -29,7 +29,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	Pl pl{
-		{10.0f,50.0f},{0.0f,0.0f},{0.0f,-0.8f},
+		{400.0f,50.0f},{0.0f,0.0f},{0.0f,-0.8f},
 	};
 
 	Vector2 startLinepos = {};
@@ -38,7 +38,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//float Under = pl.pos.y - 64;
 
-		float PltransposY = (pl.pos.y * directionY) + originposY;
+		
 
 
 	//自機画像
@@ -90,14 +90,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Novice::LoadTexture("./suuzi8(end).png"),
 		Novice::LoadTexture("./suuzi9(end).png")
 	};
+	int scoreSave = 0;
 
 	//BGM
+	int voiceHandle = 0;
 	int bgm = Novice::LoadAudio("./bgm.mp3");
 
 	//フラグ
 	int isPlJump = 0;
 	int isDubleJump = 0;
-
+	int isenemyspawn = 0;
 
 	//数字
 	int drinkanime = 120;
@@ -113,6 +115,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	int title = Novice::LoadTexture("./Title.png");
 	int gameover = Novice::LoadTexture("./Gameover.png");
 	int guide = Novice::LoadTexture("./guide.png");
+	int Score = Novice::LoadTexture("./Score.png");
 
 	int time = 0;
 	
@@ -120,24 +123,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	int bird1 = Novice::LoadTexture("./enemy_bird.gif");
 	int bike1 = Novice::LoadTexture("./enemy_huryou.gif");
 	
-	int enemyposx1 = 1280;
+	int enemyposx1 = 1000;
 	int enemyposx2 = 1580;
 	int enemyposx3 = 1480;
 	int enemyposx4 = 1780;
 	
-	int enemyposy1 = 600;
-	int enemyposy2 = 600;
-	int enemyposy3 = 500;
+	int enemyposy1 = 580;
+	int enemyposy2 = 580;
+	int enemyposy3 = 100;
 	int enemyposy4 = 300;
 	
 	int enemysize = 20;
 	
 	int enemyspeed = 10;
-
-	int time1 = 300;
-	int time2 = 300;
-	int time3 = 300;
-	int time4 = 300;
 
 	//自機のサイズ
 	int playersize = 20;
@@ -194,14 +192,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		case TITLE:
 			Novice::DrawSprite(0, 0, title, 1.0f, 1.0f, 0.0f, WHITE);
 		
-			if (keys[DIK_SPACE]&&preKeys[DIK_SPACE]) {
+			if (keys[DIK_SPACE]&&preKeys[DIK_SPACE] == 0) {
 				scene = GUIDE;
 			}
 			break;
 		case GUIDE:
 
 			Novice::DrawSprite(0, 0, guide, 1, 1, 0.0f, WHITE);
-			if (keys[DIK_SPACE] && preKeys[DIK_SPACE]) {
+			if (keys[DIK_SPACE] && preKeys[DIK_SPACE] == 0) {
 				scene = PLAY;
 			}
 			break;
@@ -243,8 +241,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		b = (playersize + enemysize) * (playersize + enemysize);
 		g = (playersize + enemysize) * (playersize + enemysize);
 		h = ((int)pl.pos.x - enemyposx2) * ((int)pl.pos.x - enemyposx2) + ((int)pl.pos.y - enemyposy2) * ((int)pl.pos.y - enemyposy2);
+		//正常に当たる
 		j = (playersize + enemysize) * (playersize + enemysize);
 		k = ((int)pl.pos.x - enemyposx3) * ((int)pl.pos.x - enemyposx3) + ((int)pl.pos.y  - enemyposy3) * ((int)pl.pos.y  - enemyposy3);
+		//
 		q = ((int)pl.pos.x - enemyposx4) * ((int)pl.pos.x - enemyposx4) + ((int)pl.pos.y  - enemyposy4) * ((int)pl.pos.y  - enemyposy4);
 		w = (playersize + enemysize) * (playersize + enemysize);
 
@@ -254,68 +254,56 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		if (g == h || g > h) {
 			isplayersurvive = 0;
 		}
+		//
 		if (k == j || j > k) {
 			isplayersurvive = 0;
 		}
+		//
 		if (w == q || w > q) {
 			isplayersurvive = 0;
 		}
-		//敵が画面外に行ったら座標を戻す
-		
-
 		
 		if (isplayersurvive == 1) {
 			//敵表示のタイム
-			time1 -= 1;
-			time2 -= 1;
-			time3 -= 1;
-			time4 -= 1;
+			isenemyspawn = 1;
 			itemtime -= 1;
 
 			//BGM
-			Novice::PlayAudio(bgm, 1, 1);
+		    if (Novice::IsPlayingAudio(voiceHandle) == 0 || voiceHandle == -1) {
+				voiceHandle = Novice::PlayAudio(bgm, 1, 1);
+			}
 			//自機
+			float PltransposY = (pl.pos.y * directionY) + originposY;
 			if (isPlJump == 0 && isDubleJump == 0) {
 				Novice::DrawSprite((int)pl.pos.x, (int)PltransposY, player[0], 1, 1, 0, WHITE);
 			}
 			//敵の描画
-			if (time1 <= 30) {
+			if (isenemyspawn == 1) {
 				Novice::DrawSprite(enemyposx1, enemyposy1, bike1, 1.5, 1.5, 0.0f, WHITE);
-				enemyposy1 = enemyposy1 + enemyspeed;
+				enemyposx1 = enemyposx1 - enemyspeed;
+
+				Novice::DrawSprite(enemyposx2, enemyposy2, bike1, 1.5, 1.5, 0.0f, WHITE);
+				enemyposx2 = enemyposx2 - enemyspeed;
+
+				Novice::DrawSprite(enemyposx3, enemyposy3, bird1, 1.5, 1.5, 0.0f, WHITE);
+				enemyposx3 = enemyposx3 - enemyspeed;
+
+				Novice::DrawSprite(enemyposx4, enemyposy4, bird1, 1.5, 1.5, 0.0f, WHITE);
+				enemyposx4 = enemyposx4 - enemyspeed;
 			}
-			if (time1 == 0) {
-				time1 = 180;
-			}
+			
 			if (enemyposx1 <= 0) {
 				enemyposx1 = 1280;
 			}
-			if (time2 <= 150) {
-				Novice::DrawSprite(enemyposx2, enemyposy2, bike1, 1.5, 1.5, 0.0f, WHITE);
-				enemyposy2 = enemyposy2 + enemyspeed;
-			}
-			if (time2 == 0) {
-				time2 = 180;
-			}
+	
 			if (enemyposx2 <= 0) {
 				enemyposx2 = 1658;
 			}
-			if (time3 <= 120) {
-				Novice::DrawSprite(enemyposx3, enemyposy3, bird1, 1.5, 1.5, 0.0f, WHITE);
-				enemyposy3 = enemyposy3 + enemyspeed;
-			}
-			if (time3 == 0) {
-				time3 = 180;
-			}
-			if (enemyposx3 >= 0) {
+			
+			if (enemyposx3 <= 0) {
 				enemyposx3 = 2347;
 			}
-			if (time4 <= 180) {
-				Novice::DrawSprite(enemyposx4, enemyposy4, bird1, 1.5, 1.5, 0.0f, WHITE);
-				enemyposy4 = enemyposy4 + enemyspeed;
-			}
-			if (time4 == 0) {
-				time4 = 180;
-			}
+			
 			if (enemyposx4 <= 0) {
 				enemyposx4 = 1973;
 			}
@@ -369,11 +357,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (isPlJump == 1) {
 				Novice::DrawSprite((int)pl.pos.x, (int)PltransposY, pljump1, 1, 1, 0, WHITE);
 			}
-			if (isPlJump == 1 && isDubleJump == 0 && DubleJumpready >= 1 && preKeys[DIK_SPACE] == 0 && keys[DIK_SPACE]) {
-				pl.velocity.y = 20.0f;
-				isDubleJump = 1;
-				
-			}
+			
 			if (isDubleJump == 1) {
 				Novice::DrawSprite((int)pl.pos.x, (int)PltransposY, pljump2, 1, 1, 0, WHITE);
 			}
@@ -395,7 +379,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				DubleJumpready = 0;
 			}
 
-
+			score += 1;
 
 
 		}
@@ -414,7 +398,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		number = score % 10;
 		eachnumber[5] = number / 1;
 		number = score % 1;
-		
+
+		if (score > hiscore) {
+			scoreSave = score;
+			hiscore = scoreSave;
+		}//ハイスコアを保存している
+
+		Novice::DrawSprite(840, -10, numgh[eachnumber[1]], 1, 1, 0.0f, WHITE);
+		Novice::DrawSprite(920, -10, numgh[eachnumber[2]], 1, 1, 0.0f, WHITE);
+		Novice::DrawSprite(1000, -10, numgh[eachnumber[3]], 1, 1, 0.0f, WHITE);
+		Novice::DrawSprite(1080, -10, numgh[eachnumber[4]], 1, 1, 0.0f, WHITE);
+		Novice::DrawSprite(1160, -10, numgh[eachnumber[5]], 1, 1, 0.0f, WHITE);
 		if (isplayersurvive == 0) {
 			scene = OVER;
 		}
@@ -422,16 +416,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		break;
 
 		case OVER:
+			Novice::StopAudio(voiceHandle);
 
 			Novice::DrawSprite(0, 0, gameover, 1, 1, 0.0f, WHITE);
-			if (keys[DIK_SPACE] && preKeys[DIK_SPACE]) {
+			if (keys[DIK_SPACE] && preKeys[DIK_SPACE] == 0) {
 				scene = SCORE;
-				isplayersurvive = 1;
 			}
 			break;
 
 		case SCORE:
 			//終了画面のスコア
+			Novice::DrawSprite(0, 0, Score, 1, 1, 0.0f, WHITE);
 			eachnumber3[0] = number / 10000;
 			number = score % 100000;
 			eachnumber3[1] = number / 10000;
@@ -466,7 +461,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Novice::DrawSprite(760, 410, numgh4[eachnumber4[3]], 1, 1, 0.0f, WHITE);
 			Novice::DrawSprite(840, 410, numgh4[eachnumber4[4]], 1, 1, 0.0f, WHITE);
 			Novice::DrawSprite(920, 410, numgh4[eachnumber4[5]], 1, 1, 0.0f, WHITE);
-			if (keys[DIK_SPACE] && preKeys[DIK_SPACE]) {
+			if (keys[DIK_SPACE] && preKeys[DIK_SPACE]==0) {
+				isplayersurvive = 1;
+				bgspeed = 10;
+				enemyspeed = 10;
+				enemyposx1 = 1000;
+				enemyposx2 = 1580;
+				enemyposx3 = 1480;
+				enemyposx4 = 1780;
+				pl.pos.y = 50;
+				score = 0;
 				scene = TITLE;
 			}
 			break;
@@ -487,12 +491,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 		
 
-		Novice::ScreenPrintf(100, 100, "%f", PltransposY);
+		//Novice::ScreenPrintf(100, 100, "%f", PltransposY);
 		Novice::ScreenPrintf(100, 200, "%d", isDubleJump);
-		Novice::ScreenPrintf(100, 300, "%d", time1);
-		Novice::ScreenPrintf(100, 350, "%d", time2);
-		Novice::ScreenPrintf(100, 400, "%d", time3);
-		Novice::ScreenPrintf(100, 450, "%d", time4);
+		
 		Novice::ScreenPrintf(100, 500, "%d", itemtime);
 		///
 		/// ↑描画処理ここまで
